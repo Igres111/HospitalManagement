@@ -7,7 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DotNetEnv" Version="3.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.29">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
-</Project>
+  <ItemGroup>
+    <ProjectReference Include="..\HospitalManagement.Application\HospitalManagement.Application.csproj" />
+    <ProjectReference Include="..\HospitalManagement.Infrastructure\HospitalManagement.Infrastructure.csproj" />
+    <ProjectReference Include="..\HospitalManagement.Shared\HospitalManagement.Shared.csproj" />
+  </ItemGroup>
+
+</Project> 

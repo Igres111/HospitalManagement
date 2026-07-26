@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Claude Code
 CLAUDE.md
+
+# Environment variables
+.env
