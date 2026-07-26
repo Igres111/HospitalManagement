@@ -105,26 +105,13 @@ public sealed class ExceptionHandlingMiddleware
             ArgumentException => HttpStatusCode.BadRequest,
             KeyNotFoundException => HttpStatusCode.NotFound,
             UnauthorizedAccessException => HttpStatusCode.Forbidden,
+            InvalidOperationException => HttpStatusCode.Conflict,
             DbUpdateConcurrencyException => HttpStatusCode.Conflict,
-            DbUpdateException dbUpdateException => GetDbUpdateStatusCode(dbUpdateException),
 
             _ => HttpStatusCode.InternalServerError
         };
     }
 
-    private static HttpStatusCode GetDbUpdateStatusCode(DbUpdateException exception)
-    {
-        if (exception.InnerException is SqlException sqlException)
-        {
-            return sqlException.Number switch
-            {
-                2601 or 2627 or 547 => HttpStatusCode.Conflict,
-                _ => HttpStatusCode.InternalServerError
-            };
-        }
-
-        return HttpStatusCode.InternalServerError;
-    }
 
     private static string GetMessage(Exception exception, HttpStatusCode statusCode)
     {
@@ -142,6 +129,8 @@ public sealed class ExceptionHandlingMiddleware
 
             UnauthorizedAccessException =>
                 "You do not have permission to perform this operation.",
+
+            InvalidOperationException => exception.Message,
 
             DbUpdateConcurrencyException =>
                 "The record was modified by another operation.",

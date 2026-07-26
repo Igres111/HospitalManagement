@@ -1,8 +1,11 @@
 using DotNetEnv;
 using HospitalManagement.Application;
 using HospitalManagement.Infrastructure;
+using HospitalManagement.WebAPI.Extensions;
 using HospitalManagement.WebAPI.Middleware;
 using Serilog;
+
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +15,6 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-Env.Load();
 
 builder.Host.UseSerilog((context, configuration) =>
 {
@@ -29,6 +30,7 @@ builder.Host.UseSerilog((context, configuration) =>
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
@@ -42,6 +44,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

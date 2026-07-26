@@ -14,6 +14,17 @@ public sealed class UserRepository : Repository<User>, IUserRepository
 
     public Task<bool> ExistsByUsernameAsync(string username, CancellationToken cancellationToken)
     {
-        return Context.Users.AnyAsync(user => user.Username.ToLower() == username.ToLower() && user.DeletedAt == null, cancellationToken);
+        return Context.Users.AnyAsync(user => user.Username == username.ToLower() && user.DeletedAt == null, cancellationToken);
+    }
+
+    public Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken)
+    {
+        return Context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                user =>
+                    user.Username == username.ToLower() &&
+                    user.DeletedAt == null,
+                cancellationToken);
     }
 }

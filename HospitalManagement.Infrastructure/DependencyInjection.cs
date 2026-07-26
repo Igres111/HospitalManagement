@@ -20,6 +20,7 @@ namespace HospitalManagement.Infrastructure
                 throw new InvalidOperationException("DB_CONNECTION_STRING environment variable is not set.");
             }
 
+            services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
             services.AddScoped<IUserRepository, UserRepository>();
