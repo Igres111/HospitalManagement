@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\HospitalManagement.Domain\HospitalManagement.Domain.csproj" />
     <ProjectReference Include="..\HospitalManagement.Shared\HospitalManagement.Shared.csproj" />
   </ItemGroup>

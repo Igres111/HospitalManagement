@@ -1,5 +1,8 @@
 using DotNetEnv;
+using HospitalManagement.Application;
 using HospitalManagement.Infrastructure;
+using HospitalManagement.WebAPI.Middleware;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,9 +15,24 @@ builder.Services.AddSwaggerGen();
 
 Env.Load();
 
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.File(
+            "Logs/log-.txt",
+            rollingInterval: RollingInterval.Day,
+            retainedFileCountLimit: 14);
+});
+
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

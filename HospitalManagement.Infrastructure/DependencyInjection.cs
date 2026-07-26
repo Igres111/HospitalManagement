@@ -1,4 +1,8 @@
-﻿using HospitalManagement.Infrastructure.Persistence;
+﻿using HospitalManagement.Application.Interfaces;
+using HospitalManagement.Infrastructure.Implementations;
+using HospitalManagement.Infrastructure.Implementations.BaseRepository;
+using HospitalManagement.Infrastructure.Persistence;
+using HospitalManagement.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +19,10 @@ namespace HospitalManagement.Infrastructure
             {
                 throw new InvalidOperationException("DB_CONNECTION_STRING environment variable is not set.");
             }
+
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
+            services.AddScoped<IUserRepository, UserRepository>();
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 
