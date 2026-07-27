@@ -12,5 +12,7 @@ namespace HospitalManagement.Domain.Entities
         public string PasswordHash { get; set; } = null!;
 
         public UserRole Role { get; set; }
+
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }

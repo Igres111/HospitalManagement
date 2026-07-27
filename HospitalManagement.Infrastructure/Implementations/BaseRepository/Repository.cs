@@ -12,6 +12,11 @@ public class Repository<T> : IRepository<T> where T : class
         Context = context;
     }
 
+    public async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        return await Context.Set<T>().FindAsync(new object[] { id }, cancellationToken);
+    }
+
     public async Task AddAsync(T entity,CancellationToken cancellationToken)
     {
         await Context.Set<T>().AddAsync(entity, cancellationToken);

@@ -65,12 +65,39 @@ public class AuthenticationController : ControllerBase
     /// <response code="400">Validation failed.</response>
     /// <response code="401">Username or password is invalid.</response>
     [HttpPost("login")]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<string>> Login([FromBody] LoginUserRequest body, CancellationToken cancellationToken)
+    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginUserRequest body, CancellationToken cancellationToken)
     {
         var response = await _authenticationService.LoginAsync(body,cancellationToken);
+
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Exchanges a valid refresh token for a new access token and refresh token.
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /api/auth/refresh
+    ///     {
+    ///         "refreshToken": "..."
+    ///     }
+    ///
+    /// The refresh token used in this request is revoked and replaced with a new one (rotation).
+    /// </remarks>
+    /// <response code="200">Token refreshed successfully.</response>
+    /// <response code="400">Validation failed.</response>
+    /// <response code="401">The refresh token is missing, invalid, expired, or revoked.</response>
+    [HttpPost("refresh")]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<LoginResponse>> RefreshToken([FromBody] RefreshTokenRequest body, CancellationToken cancellationToken)
+    {
+        var response = await _authenticationService.RefreshTokenAsync(body,cancellationToken);
 
         return Ok(response);
     }

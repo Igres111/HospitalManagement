@@ -3,6 +3,7 @@ using HospitalManagement.WebAPI.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Security.Authentication;
 using System.Text.Json;
 
 namespace HospitalManagement.WebAPI.Middleware;
@@ -104,6 +105,7 @@ public sealed class ExceptionHandlingMiddleware
             ValidationException => HttpStatusCode.BadRequest,
             ArgumentException => HttpStatusCode.BadRequest,
             KeyNotFoundException => HttpStatusCode.NotFound,
+            AuthenticationException => HttpStatusCode.Unauthorized,
             UnauthorizedAccessException => HttpStatusCode.Forbidden,
             InvalidOperationException => HttpStatusCode.Conflict,
             DbUpdateConcurrencyException => HttpStatusCode.Conflict,
@@ -126,6 +128,8 @@ public sealed class ExceptionHandlingMiddleware
             ArgumentException => exception.Message,
 
             KeyNotFoundException => exception.Message,
+
+            AuthenticationException => exception.Message,
 
             UnauthorizedAccessException =>
                 "You do not have permission to perform this operation.",
