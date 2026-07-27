@@ -21,7 +21,6 @@
   <ItemGroup>
     <ProjectReference Include="..\HospitalManagement.Application\HospitalManagement.Application.csproj" />
     <ProjectReference Include="..\HospitalManagement.Infrastructure\HospitalManagement.Infrastructure.csproj" />
-    <ProjectReference Include="..\HospitalManagement.Shared\HospitalManagement.Shared.csproj" />
   </ItemGroup>
 
 </Project> 

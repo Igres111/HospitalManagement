@@ -17,7 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\HospitalManagement.Application\HospitalManagement.Application.csproj" />
     <ProjectReference Include="..\HospitalManagement.Domain\HospitalManagement.Domain.csproj" />
-    <ProjectReference Include="..\HospitalManagement.Shared\HospitalManagement.Shared.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
