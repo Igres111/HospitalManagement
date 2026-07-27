@@ -28,6 +28,7 @@ namespace HospitalManagement.Infrastructure
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IDoctorRepository, DoctorRepository>();
+            services.AddScoped<IPatientRepository, PatientRepository>();
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 

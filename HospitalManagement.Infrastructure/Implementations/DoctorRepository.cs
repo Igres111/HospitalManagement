@@ -14,13 +14,8 @@ namespace HospitalManagement.Infrastructure.Implementations
 
         }
 
-        public Task<bool> ExistsByEmailAsync(string? email, CancellationToken cancellationToken)
+        public Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken)
         {
-            if (email is null)
-            {
-                return Task.FromResult(false);
-            }
-
             return Context.Doctors.AnyAsync(
                 doctor =>
                     doctor.Email == email &&
@@ -86,7 +81,7 @@ namespace HospitalManagement.Infrastructure.Implementations
         {
             var normalizedSortBy = sortBy?
                 .Trim()
-                .ToLowerInvariant();
+                .ToLower();
 
             return normalizedSortBy switch
             {

@@ -4,7 +4,7 @@ namespace HospitalManagement.Application.Interfaces
 {
     public interface IDoctorRepository : IRepository<Doctor>
     {
-        Task<bool> ExistsByEmailAsync(string? email, CancellationToken cancellationToken);
+        Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken);
         Task<bool> ExistsByEmailAsync(string email, int excludedDoctorId, CancellationToken cancellationToken);
         Task<Doctor?> GetActiveByIdAsync(int id, CancellationToken cancellationToken);
         Task<bool> HasFutureAppointmentsAsync(int doctorId, CancellationToken cancellationToken);

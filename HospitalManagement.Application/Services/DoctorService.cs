@@ -29,7 +29,7 @@ public class DoctorService
     {
         await _createDoctorValidator.ValidateAndThrowAsync(body,cancellationToken);
 
-        var normalizedEmail = body.Email?.Trim().ToLower();
+        var normalizedEmail = body.Email.Trim().ToLower();
 
         var doctorExists = await _doctorRepository.ExistsByEmailAsync(normalizedEmail, cancellationToken);
 
@@ -44,7 +44,7 @@ public class DoctorService
             LastName = body.LastName.Trim(),
             Specialization = body.Specialization.Trim(),
             PhoneNumber = string.IsNullOrWhiteSpace(body.PhoneNumber) ? null : body.PhoneNumber.Trim(),
-            Email = string.IsNullOrWhiteSpace(body.Email) ? null : normalizedEmail,
+            Email = normalizedEmail,
             CreatedAt = DateTime.UtcNow
         };
 

@@ -30,10 +30,11 @@ public class CreateDoctorRequestValidator : AbstractValidator<CreateDoctorReques
             .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber));
 
         RuleFor(x => x.Email)
+            .NotEmpty()
+            .WithMessage("Email is required.")
             .EmailAddress()
             .WithMessage("Email address is invalid.")
             .MaximumLength(100)
-            .WithMessage("Email cannot exceed 100 characters.")
-            .When(x => !string.IsNullOrWhiteSpace(x.Email));
+            .WithMessage("Email cannot exceed 100 characters.");
     }
 }

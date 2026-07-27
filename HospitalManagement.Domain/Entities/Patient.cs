@@ -14,7 +14,7 @@ namespace HospitalManagement.Domain.Entities
 
         public string? PhoneNumber { get; set; }
 
-        public string? Email { get; set; }
+        public string Email { get; set; } = null!;
 
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
     }

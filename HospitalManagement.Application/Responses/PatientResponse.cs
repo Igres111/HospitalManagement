@@ -1,10 +1,10 @@
 ﻿namespace HospitalManagement.Application.Responses
 {
-    public record DoctorResponse(
+    public record PatientResponse(
         int Id,
         string FirstName,
         string LastName,
-        string Specialization,
+        DateOnly DateOfBirth,
         string? PhoneNumber,
         string Email,
         DateTime CreatedAt);

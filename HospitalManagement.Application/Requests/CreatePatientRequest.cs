@@ -1,9 +1,9 @@
 ﻿namespace HospitalManagement.Application.Requests
 {
-    public record CreateDoctorRequest(
+    public record CreatePatientRequest(
         string FirstName,
         string LastName,
-        string Specialization,
+        DateOnly DateOfBirth,
         string? PhoneNumber,
         string Email);
 }
