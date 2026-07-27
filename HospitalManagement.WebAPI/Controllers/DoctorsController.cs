@@ -101,7 +101,7 @@ namespace HospitalManagement.WebAPI.Controllers
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<DoctorResponse>> GetById(int doctorId,CancellationToken cancellationToken)
+        public async Task<ActionResult<DoctorResponse>> GetById([FromRoute] int doctorId,CancellationToken cancellationToken)
         {
             var response = await _doctorService.GetByIdAsync(doctorId,cancellationToken);
 
@@ -114,7 +114,7 @@ namespace HospitalManagement.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<DoctorResponse>> Update(int doctorId, [FromBody] UpdateDoctorRequest body, CancellationToken cancellationToken)
+        public async Task<ActionResult<DoctorResponse>> Update([FromRoute] int doctorId, [FromBody] UpdateDoctorRequest body, CancellationToken cancellationToken)
         {
             var response = await _doctorService.UpdateAsync(
                 doctorId,
@@ -150,7 +150,7 @@ namespace HospitalManagement.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> Delete(int doctorId,CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete([FromRoute] int doctorId,CancellationToken cancellationToken)
         {
             await _doctorService.DeleteAsync(doctorId,cancellationToken);
 

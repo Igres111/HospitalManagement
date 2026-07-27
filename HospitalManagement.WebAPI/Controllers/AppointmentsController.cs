@@ -102,7 +102,7 @@ namespace HospitalManagement.WebAPI.Controllers
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<AppointmentResponse>> GetById(int appointmentId,CancellationToken cancellationToken)
+        public async Task<ActionResult<AppointmentResponse>> GetById([FromRoute] int appointmentId,CancellationToken cancellationToken)
         {
             var response = await _appointmentService.GetByIdAsync(appointmentId, cancellationToken);
 
@@ -139,7 +139,7 @@ namespace HospitalManagement.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<AppointmentResponse>> Update(int appointmentId, [FromBody] UpdateAppointmentRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<AppointmentResponse>> Update([FromRoute] int appointmentId, [FromBody] UpdateAppointmentRequest request, CancellationToken cancellationToken)
         {
             var response = await _appointmentService.UpdateAsync(
                 appointmentId,
@@ -168,7 +168,7 @@ namespace HospitalManagement.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> Delete(int appointmentId, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete([FromRoute] int appointmentId, CancellationToken cancellationToken)
         {
             await _appointmentService.DeleteAsync(appointmentId,cancellationToken);
 
