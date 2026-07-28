@@ -108,7 +108,7 @@ namespace HospitalManagement.WebAPI.Controllers
             return Ok(response);
         }
 
-        [HttpPatch("{doctorId:int}")]
+        [HttpPut("{doctorId:int}")]
         [ProducesResponseType(typeof(DoctorResponse),StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiErrorResponse),StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

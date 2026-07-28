@@ -2,6 +2,7 @@
 using HospitalManagement.Application.Responses;
 using HospitalManagement.Application.Services;
 using HospitalManagement.WebAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HospitalManagement.WebAPI.Controllers;
@@ -38,6 +39,7 @@ public class AuthenticationController : ControllerBase
     /// <response code="409">An active user with the same username already exists.</response>
     /// <response code="500">An unexpected server error occurred.</response>
     [HttpPost("register")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status409Conflict)]
@@ -65,6 +67,7 @@ public class AuthenticationController : ControllerBase
     /// <response code="400">Validation failed.</response>
     /// <response code="401">Username or password is invalid.</response>
     [HttpPost("login")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]
@@ -92,6 +95,7 @@ public class AuthenticationController : ControllerBase
     /// <response code="400">Validation failed.</response>
     /// <response code="401">The refresh token is missing, invalid, expired, or revoked.</response>
     [HttpPost("refresh")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]
