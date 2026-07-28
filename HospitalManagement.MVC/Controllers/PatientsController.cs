@@ -1,6 +1,7 @@
 using HospitalManagement.MVC.Auth;
 using HospitalManagement.MVC.Dtos.Requests;
 using HospitalManagement.MVC.Models.Patients;
+using HospitalManagement.MVC.Services;
 using HospitalManagement.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -60,9 +61,18 @@ namespace HospitalManagement.MVC.Controllers
                 model.PhoneNumber,
                 model.Email);
 
-            var created = await _patientService.CreateAsync(request, cancellationToken);
+            try
+            {
+                var created = await _patientService.CreateAsync(request, cancellationToken);
 
-            return RedirectToAction(nameof(Details), new { id = created.Id });
+                return RedirectToAction(nameof(Details), new { id = created.Id });
+            }
+            catch (ApiException ex)
+            {
+                ViewBag.ApiErrorMessage = ex.Message;
+                ViewBag.ApiErrorModalTitle = "Unable to Create Patient";
+                return View(model);
+            }
         }
 
         [HttpGet]
@@ -102,9 +112,18 @@ namespace HospitalManagement.MVC.Controllers
                 model.PhoneNumber,
                 model.Email);
 
-            await _patientService.UpdateAsync(id, request, cancellationToken);
+            try
+            {
+                await _patientService.UpdateAsync(id, request, cancellationToken);
 
-            return RedirectToAction(nameof(Details), new { id });
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (ApiException ex)
+            {
+                ViewBag.ApiErrorMessage = ex.Message;
+                ViewBag.ApiErrorModalTitle = "Unable to Update Patient";
+                return View(model);
+            }
         }
 
         [HttpPost]
@@ -112,9 +131,26 @@ namespace HospitalManagement.MVC.Controllers
         [Authorize(Roles = AppRoles.Administrator)]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            await _patientService.DeleteAsync(id, cancellationToken);
+            try
+            {
+                await _patientService.DeleteAsync(id, cancellationToken);
 
-            return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
+            }
+            catch (ApiException ex)
+            {
+                var filter = new PatientFilterViewModel();
+                var page = await _patientService.GetAllAsync(filter, cancellationToken);
+                ViewBag.ApiErrorMessage = ex.Message;
+                ViewBag.ApiErrorModalTitle = "Unable to Delete Patient";
+                return View(nameof(Index), new PatientIndexViewModel
+                {
+                    Page = page,
+                    Search = filter.Search,
+                    SortBy = filter.SortBy,
+                    SortDescending = filter.SortDescending
+                });
+            }
         }
     }
 }

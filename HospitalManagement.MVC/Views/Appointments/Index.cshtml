@@ -22,7 +22,7 @@
     };
 }
 
-<h1>Appointments</h1>
+<h1>Dashboard of Appointments</h1>
 
 <p>
     <a class="btn btn-primary" asp-action="Create">Create New</a>
@@ -122,3 +122,5 @@
            asp-route-pageSize="@Model.Page.PageSize">Next</a>
     }
 </div>
+
+@await Html.PartialAsync("_ApiErrorModal")

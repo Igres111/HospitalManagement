@@ -1,7 +1,20 @@
 using HospitalManagement.MVC;
 using HospitalManagement.MVC.Middleware;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.File(
+            "Logs/mvc-log-.txt",
+            rollingInterval: RollingInterval.Day,
+            retainedFileCountLimit: 14);
+});
 
 // Add services to the container.
 builder.Services.AddMvcServices(builder.Configuration);

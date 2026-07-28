@@ -38,6 +38,8 @@
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>
 
+@await Html.PartialAsync("_ApiErrorModal")
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

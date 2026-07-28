@@ -80,3 +80,5 @@
         <a asp-action="Index" asp-route-search="@Model.Search" asp-route-sortBy="@Model.SortBy" asp-route-sortDescending="@Model.SortDescending" asp-route-pageNumber="@(Model.Page.PageNumber + 1)" asp-route-pageSize="@Model.Page.PageSize">Next</a>
     }
 </div>
+
+@await Html.PartialAsync("_ApiErrorModal")
