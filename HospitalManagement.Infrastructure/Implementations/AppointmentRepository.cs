@@ -1,6 +1,7 @@
 ﻿using HospitalManagement.Application.Interfaces;
 using HospitalManagement.Domain.Entities;
 using HospitalManagement.Domain.Enums;
+using HospitalManagement.Infrastructure.Helpers;
 using HospitalManagement.Infrastructure.Implementations.BaseRepository;
 using HospitalManagement.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -99,19 +100,19 @@ namespace HospitalManagement.Infrastructure.Implementations
 
             if (dateFrom is not null)
             {
-                query = query.Where(appointment =>appointment.AppointmentDate >= dateFrom.Value);
+                query = query.Where(appointment => appointment.AppointmentDate >= dateFrom.Value);
             }
 
             if (dateTo is not null)
             {
-                query = query.Where(appointment =>appointment.AppointmentDate <= dateTo.Value);
+                query = query.Where(appointment => appointment.AppointmentDate <= dateTo.Value);
             }
 
             var totalCount = await query.CountAsync(cancellationToken);
 
             query = ApplySorting(
                 query,
-                sortBy,
+                SortFieldParser.Parse(sortBy, AppointmentSortField.Id),
                 sortDescending);
 
             var appointments = await query
@@ -122,90 +123,60 @@ namespace HospitalManagement.Infrastructure.Implementations
             return (appointments, totalCount);
         }
         private static IQueryable<Appointment> ApplySorting(
-           IQueryable<Appointment> query,
-           string? sortBy,
-           bool sortDescending)
+            IQueryable<Appointment> query,
+            AppointmentSortField sortField,
+            bool sortDescending)
         {
-            var normalizedSortBy = sortBy?.Trim().ToLower();
+            IOrderedQueryable<Appointment> orderedQuery;
 
-            return normalizedSortBy switch
+            if (sortField == AppointmentSortField.AppointmentDate)
             {
-                "appointmentdate" => sortDescending
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(appointment => appointment.AppointmentDate)
+                    : query.OrderBy(appointment => appointment.AppointmentDate);
+            }
+            else if (sortField == AppointmentSortField.Status)
+            {
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(appointment => appointment.Status)
+                    : query.OrderBy(appointment => appointment.Status);
+            }
+            else if (sortField == AppointmentSortField.CreatedAt)
+            {
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(appointment => appointment.CreatedAt)
+                    : query.OrderBy(appointment => appointment.CreatedAt);
+            }
+            else if (sortField == AppointmentSortField.DoctorName)
+            {
+                orderedQuery = sortDescending
                     ? query
-                        .OrderByDescending(
-                            appointment => appointment.AppointmentDate)
-                        .ThenByDescending(
-                            appointment => appointment.Id)
+                        .OrderByDescending(appointment => appointment.Doctor.LastName)
+                        .ThenByDescending(appointment => appointment.Doctor.FirstName)
                     : query
-                        .OrderBy(
-                            appointment => appointment.AppointmentDate)
-                        .ThenBy(
-                            appointment => appointment.Id),
+                        .OrderBy(appointment => appointment.Doctor.LastName)
+                        .ThenBy(appointment => appointment.Doctor.FirstName);
+            }
+            else if (sortField == AppointmentSortField.PatientName)
+            {
+                orderedQuery = sortDescending
+                    ? query
+                        .OrderByDescending(appointment => appointment.Patient.LastName)
+                        .ThenByDescending(appointment => appointment.Patient.FirstName)
+                    : query
+                        .OrderBy(appointment => appointment.Patient.LastName)
+                        .ThenBy(appointment => appointment.Patient.FirstName);
+            }
+            else
+            {
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(appointment => appointment.Id)
+                    : query.OrderBy(appointment => appointment.Id);
+            }
 
-                "status" => sortDescending
-                    ? query
-                        .OrderByDescending(
-                            appointment => appointment.Status)
-                        .ThenByDescending(
-                            appointment => appointment.Id)
-                    : query
-                        .OrderBy(
-                            appointment => appointment.Status)
-                        .ThenBy(
-                            appointment => appointment.Id),
-
-                "createdat" => sortDescending
-                    ? query
-                        .OrderByDescending(
-                            appointment => appointment.CreatedAt)
-                        .ThenByDescending(
-                            appointment => appointment.Id)
-                    : query
-                        .OrderBy(
-                            appointment => appointment.CreatedAt)
-                        .ThenBy(
-                            appointment => appointment.Id),
-
-                "doctorname" => sortDescending
-                    ? query
-                        .OrderByDescending(
-                            appointment => appointment.Doctor.LastName)
-                        .ThenByDescending(
-                            appointment => appointment.Doctor.FirstName)
-                        .ThenByDescending(
-                            appointment => appointment.Id)
-                    : query
-                        .OrderBy(
-                            appointment => appointment.Doctor.LastName)
-                        .ThenBy(
-                            appointment => appointment.Doctor.FirstName)
-                        .ThenBy(
-                            appointment => appointment.Id),
-
-                "patientname" => sortDescending
-                    ? query
-                        .OrderByDescending(
-                            appointment => appointment.Patient.LastName)
-                        .ThenByDescending(
-                            appointment => appointment.Patient.FirstName)
-                        .ThenByDescending(
-                            appointment => appointment.Id)
-                    : query
-                        .OrderBy(
-                            appointment => appointment.Patient.LastName)
-                        .ThenBy(
-                            appointment => appointment.Patient.FirstName)
-                        .ThenBy(
-                            appointment => appointment.Id),
-
-                _ => sortDescending
-                    ? query
-                        .OrderByDescending(
-                            appointment => appointment.Id)
-                    : query
-                        .OrderBy(
-                            appointment => appointment.Id)
-            };
+            return sortDescending
+                ? orderedQuery.ThenByDescending(appointment => appointment.Id)
+                : orderedQuery.ThenBy(appointment => appointment.Id);
         }
 
         public Task<Appointment?> GetActiveByIdAsync(int appointmentId, CancellationToken cancellationToken)

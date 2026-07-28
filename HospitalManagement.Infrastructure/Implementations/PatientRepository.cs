@@ -1,6 +1,7 @@
 ﻿using HospitalManagement.Application.Interfaces;
 using HospitalManagement.Domain.Entities;
 using HospitalManagement.Domain.Enums;
+using HospitalManagement.Infrastructure.Helpers;
 using HospitalManagement.Infrastructure.Implementations.BaseRepository;
 using HospitalManagement.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -83,7 +84,7 @@ namespace HospitalManagement.Infrastructure.Implementations
 
             query = ApplySorting(
                 query,
-                sortBy,
+                SortFieldParser.Parse(sortBy, PatientSortField.Id),
                 sortDescending);
 
             var totalCount = await query.CountAsync(cancellationToken);
@@ -98,57 +99,51 @@ namespace HospitalManagement.Infrastructure.Implementations
 
         private static IQueryable<Patient> ApplySorting(
        IQueryable<Patient> query,
-       string? sortBy,
+       PatientSortField sortField,
        bool sortDescending)
         {
-            var normalizedSortBy = sortBy?.Trim().ToLower();
+            IOrderedQueryable<Patient> orderedQuery;
 
-            return normalizedSortBy switch
+            if (sortField == PatientSortField.FirstName)
             {
-                "firstname" => sortDescending
-                    ? query
-                        .OrderByDescending(patient => patient.FirstName)
-                        .ThenByDescending(patient => patient.Id)
-                    : query
-                        .OrderBy(patient => patient.FirstName)
-                        .ThenBy(patient => patient.Id),
-
-                "lastname" => sortDescending
-                    ? query
-                        .OrderByDescending(patient => patient.LastName)
-                        .ThenByDescending(patient => patient.Id)
-                    : query
-                        .OrderBy(patient => patient.LastName)
-                        .ThenBy(patient => patient.Id),
-
-                "dateofbirth" => sortDescending
-                    ? query
-                        .OrderByDescending(patient => patient.DateOfBirth)
-                        .ThenByDescending(patient => patient.Id)
-                    : query
-                        .OrderBy(patient => patient.DateOfBirth)
-                        .ThenBy(patient => patient.Id),
-
-                "email" => sortDescending
-                    ? query
-                        .OrderByDescending(patient => patient.Email)
-                        .ThenByDescending(patient => patient.Id)
-                    : query
-                        .OrderBy(patient => patient.Email)
-                        .ThenBy(patient => patient.Id),
-
-                "createdat" => sortDescending
-                    ? query
-                        .OrderByDescending(patient => patient.CreatedAt)
-                        .ThenByDescending(patient => patient.Id)
-                    : query
-                        .OrderBy(patient => patient.CreatedAt)
-                        .ThenBy(patient => patient.Id),
-
-                _ => sortDescending
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(patient => patient.FirstName)
+                    : query.OrderBy(patient => patient.FirstName);
+            }
+            else if (sortField == PatientSortField.LastName)
+            {
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(patient => patient.LastName)
+                    : query.OrderBy(patient => patient.LastName);
+            }
+            else if (sortField == PatientSortField.DateOfBirth)
+            {
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(patient => patient.DateOfBirth)
+                    : query.OrderBy(patient => patient.DateOfBirth);
+            }
+            else if (sortField == PatientSortField.Email)
+            {
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(patient => patient.Email)
+                    : query.OrderBy(patient => patient.Email);
+            }
+            else if (sortField == PatientSortField.CreatedAt)
+            {
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(patient => patient.CreatedAt)
+                    : query.OrderBy(patient => patient.CreatedAt);
+            }
+            else
+            {
+                orderedQuery = sortDescending
                     ? query.OrderByDescending(patient => patient.Id)
-                    : query.OrderBy(patient => patient.Id)
-            };
+                    : query.OrderBy(patient => patient.Id);
+            }
+
+            return sortDescending
+                ? orderedQuery.ThenByDescending(patient => patient.Id)
+                : orderedQuery.ThenBy(patient => patient.Id);
         }
     }
 }

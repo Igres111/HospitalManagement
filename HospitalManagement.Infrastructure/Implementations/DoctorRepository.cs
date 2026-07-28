@@ -1,6 +1,7 @@
 ﻿using HospitalManagement.Application.Interfaces;
 using HospitalManagement.Domain.Entities;
 using HospitalManagement.Domain.Enums;
+using HospitalManagement.Infrastructure.Helpers;
 using HospitalManagement.Infrastructure.Implementations.BaseRepository;
 using HospitalManagement.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -61,7 +62,7 @@ namespace HospitalManagement.Infrastructure.Implementations
 
             query = ApplySorting(
                 query,
-                sortBy,
+                SortFieldParser.Parse(sortBy, DoctorSortField.Id),
                 sortDescending);
 
             var totalCount = await query.CountAsync(cancellationToken);
@@ -75,61 +76,54 @@ namespace HospitalManagement.Infrastructure.Implementations
         }
 
         private static IQueryable<Doctor> ApplySorting(
-            IQueryable<Doctor> query,
-            string? sortBy,
-            bool sortDescending)
+       IQueryable<Doctor> query,
+       DoctorSortField sortField,
+       bool sortDescending)
         {
-            var normalizedSortBy = sortBy?
-                .Trim()
-                .ToLower();
+            IOrderedQueryable<Doctor> orderedQuery;
 
-            return normalizedSortBy switch
+            if (sortField == DoctorSortField.FirstName)
             {
-                "firstname" => sortDescending
-                    ? query
-                        .OrderByDescending(doctor => doctor.FirstName)
-                        .ThenByDescending(doctor => doctor.Id)
-                    : query
-                        .OrderBy(doctor => doctor.FirstName)
-                        .ThenBy(doctor => doctor.Id),
-
-                "lastname" => sortDescending
-                    ? query
-                        .OrderByDescending(doctor => doctor.LastName)
-                        .ThenByDescending(doctor => doctor.Id)
-                    : query
-                        .OrderBy(doctor => doctor.LastName)
-                        .ThenBy(doctor => doctor.Id),
-
-                "specialization" => sortDescending
-                    ? query
-                        .OrderByDescending(doctor => doctor.Specialization)
-                        .ThenByDescending(doctor => doctor.Id)
-                    : query
-                        .OrderBy(doctor => doctor.Specialization)
-                        .ThenBy(doctor => doctor.Id),
-
-                "email" => sortDescending
-                    ? query
-                        .OrderByDescending(doctor => doctor.Email)
-                        .ThenByDescending(doctor => doctor.Id)
-                    : query
-                        .OrderBy(doctor => doctor.Email)
-                        .ThenBy(doctor => doctor.Id),
-
-                "createdat" => sortDescending
-                    ? query
-                        .OrderByDescending(doctor => doctor.CreatedAt)
-                        .ThenByDescending(doctor => doctor.Id)
-                    : query
-                        .OrderBy(doctor => doctor.CreatedAt)
-                        .ThenBy(doctor => doctor.Id),
-
-                _ => sortDescending
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(doctor => doctor.FirstName)
+                    : query.OrderBy(doctor => doctor.FirstName);
+            }
+            else if (sortField == DoctorSortField.LastName)
+            {
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(doctor => doctor.LastName)
+                    : query.OrderBy(doctor => doctor.LastName);
+            }
+            else if (sortField == DoctorSortField.Specialization)
+            {
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(doctor => doctor.Specialization)
+                    : query.OrderBy(doctor => doctor.Specialization);
+            }
+            else if (sortField == DoctorSortField.Email)
+            {
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(doctor => doctor.Email)
+                    : query.OrderBy(doctor => doctor.Email);
+            }
+            else if (sortField == DoctorSortField.CreatedAt)
+            {
+                orderedQuery = sortDescending
+                    ? query.OrderByDescending(doctor => doctor.CreatedAt)
+                    : query.OrderBy(doctor => doctor.CreatedAt);
+            }
+            else
+            {
+                orderedQuery = sortDescending
                     ? query.OrderByDescending(doctor => doctor.Id)
-                    : query.OrderBy(doctor => doctor.Id)
-            };
+                    : query.OrderBy(doctor => doctor.Id);
+            }
+
+            return sortDescending
+                ? orderedQuery.ThenByDescending(doctor => doctor.Id)
+                : orderedQuery.ThenBy(doctor => doctor.Id);
         }
+
         public Task<bool> HasFutureAppointmentsAsync(int doctorId,CancellationToken cancellationToken)
         {
             return Context.Appointments.AnyAsync(
