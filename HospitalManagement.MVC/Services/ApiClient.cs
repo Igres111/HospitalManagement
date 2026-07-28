@@ -70,5 +70,15 @@ namespace HospitalManagement.MVC.Services
                 error?.Message ?? "An unexpected error occurred while calling the API.",
                 error?.Details);
         }
+
+        public async Task PostAsync<TRequest>(string requestUri, TRequest body, CancellationToken cancellationToken = default)
+        {
+            using var response = await _httpClient.PostAsJsonAsync(requestUri, body, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw await BuildApiExceptionAsync(response, cancellationToken);
+            }
+        }
     }
 }

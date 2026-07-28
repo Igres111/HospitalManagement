@@ -105,4 +105,30 @@ public class AuthenticationController : ControllerBase
 
         return Ok(response);
     }
+
+    /// <summary>
+    /// Revokes a refresh token, ending the session it belongs to.
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /api/auth/logout
+    ///     {
+    ///         "refreshToken": "..."
+    ///     }
+    ///
+    /// Idempotent: an already-revoked, expired, or unknown token still returns 204.
+    /// </remarks>
+    /// <response code="204">Logout processed.</response>
+    /// <response code="400">Validation failed.</response>
+    [HttpPost("logout")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest body, CancellationToken cancellationToken)
+    {
+        await _authenticationService.LogoutAsync(body, cancellationToken);
+
+        return NoContent();
+    }
 }

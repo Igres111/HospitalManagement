@@ -44,7 +44,7 @@ public class AuthenticationService
         _jwtOptions = jwtOptions.Value;
     }
 
-    public async Task<RegisterResponse> RegisterAsync(RegisterUserRequest body,CancellationToken cancellationToken)
+    public async Task<RegisterResponse> RegisterAsync(RegisterUserRequest body, CancellationToken cancellationToken)
     {
         await _validator.ValidateAndThrowAsync(body, cancellationToken);
 
@@ -65,7 +65,7 @@ public class AuthenticationService
             CreatedAt = DateTime.UtcNow
         };
 
-        await _userRepository.AddAsync(user,cancellationToken);
+        await _userRepository.AddAsync(user, cancellationToken);
 
         await _userRepository.SaveChangesAsync(cancellationToken);
 
@@ -74,18 +74,18 @@ public class AuthenticationService
 
     public async Task<LoginResponse> LoginAsync(LoginUserRequest body, CancellationToken cancellationToken)
     {
-        await _loginValidator.ValidateAndThrowAsync(body,cancellationToken);
+        await _loginValidator.ValidateAndThrowAsync(body, cancellationToken);
 
         var username = body.Username.Trim();
 
-        var user = await _userRepository.GetByUsernameAsync(username,cancellationToken);
+        var user = await _userRepository.GetByUsernameAsync(username, cancellationToken);
 
         if (user is null)
         {
             throw new AuthenticationException("Invalid username or password.");
         }
 
-        var passwordIsValid = _passwordHasher.Verify(body.Password,user.PasswordHash);
+        var passwordIsValid = _passwordHasher.Verify(body.Password, user.PasswordHash);
 
         if (!passwordIsValid)
         {
@@ -145,5 +145,21 @@ public class AuthenticationService
         await _refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
 
         return refreshToken;
+    }
+
+    public async Task LogoutAsync(RefreshTokenRequest body, CancellationToken cancellationToken)
+    {
+        await _refreshTokenValidator.ValidateAndThrowAsync(body, cancellationToken);
+
+        var storedToken = await _refreshTokenRepository.GetByTokenAsync(body.RefreshToken, cancellationToken);
+
+        if (storedToken is null || storedToken.RevokedAt is not null)
+        {
+            return;
+        }
+
+        storedToken.RevokedAt = DateTime.UtcNow;
+
+        await _refreshTokenRepository.SaveChangesAsync(cancellationToken);
     }
 }
