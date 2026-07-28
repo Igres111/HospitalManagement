@@ -8,13 +8,13 @@ public interface IDoctorService
 {
     Task<PagedResponse<DoctorResponse>> GetAllAsync(
         DoctorFilterViewModel filter,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken);
 
-    Task<DoctorResponse> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<DoctorResponse> GetByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task<DoctorResponse> CreateAsync(CreateDoctorRequest request, CancellationToken cancellationToken = default);
+    Task<DoctorResponse> CreateAsync(CreateDoctorRequest request, CancellationToken cancellationToken);
 
-    Task<DoctorResponse> UpdateAsync(int id, UpdateDoctorRequest request, CancellationToken cancellationToken = default);
+    Task<DoctorResponse> UpdateAsync(int id, UpdateDoctorRequest request, CancellationToken cancellationToken);
 
-    Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+    Task DeleteAsync(int id, CancellationToken cancellationToken);
 }

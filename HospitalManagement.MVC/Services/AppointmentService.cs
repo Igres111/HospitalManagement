@@ -16,29 +16,29 @@ namespace HospitalManagement.MVC.Services
             _apiClient = apiClient;
         }
 
-        public Task<PagedResponse<AppointmentResponse>> GetAllAsync(AppointmentFilterViewModel filter, CancellationToken cancellationToken = default)
+        public Task<PagedResponse<AppointmentResponse>> GetAllAsync(AppointmentFilterViewModel filter, CancellationToken cancellationToken)
         {
             var url = BuildQueryUrl(filter);
 
             return _apiClient.GetAsync<PagedResponse<AppointmentResponse>>(url, cancellationToken);
         }
 
-        public Task<AppointmentResponse> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public Task<AppointmentResponse> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             return _apiClient.GetAsync<AppointmentResponse>($"api/appointments/{id}", cancellationToken);
         }
 
-        public Task<AppointmentResponse> CreateAsync(CreateAppointmentRequest request, CancellationToken cancellationToken = default)
+        public Task<AppointmentResponse> CreateAsync(CreateAppointmentRequest request, CancellationToken cancellationToken)
         {
             return _apiClient.PostAsync<CreateAppointmentRequest, AppointmentResponse>("api/appointments", request, cancellationToken);
         }
 
-        public Task<AppointmentResponse> UpdateAsync(int id, UpdateAppointmentRequest request, CancellationToken cancellationToken = default)
+        public Task<AppointmentResponse> UpdateAsync(int id, UpdateAppointmentRequest request, CancellationToken cancellationToken)
         {
             return _apiClient.PutAsync<UpdateAppointmentRequest, AppointmentResponse>($"api/appointments/{id}", request, cancellationToken);
         }
 
-        public Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+        public Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
             return _apiClient.DeleteAsync($"api/appointments/{id}", cancellationToken);
         }

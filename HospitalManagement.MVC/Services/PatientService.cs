@@ -17,29 +17,29 @@ public class PatientService : IPatientService
 
     public Task<PagedResponse<PatientResponse>> GetAllAsync(
         PatientFilterViewModel filter,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var url = BuildQueryUrl(filter.Search, filter.SortBy, filter.SortDescending, filter.PageNumber, filter.PageSize);
 
         return _apiClient.GetAsync<PagedResponse<PatientResponse>>(url, cancellationToken);
     }
 
-    public Task<PatientResponse> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public Task<PatientResponse> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         return _apiClient.GetAsync<PatientResponse>($"api/patients/{id}", cancellationToken);
     }
 
-    public Task<PatientResponse> CreateAsync(CreatePatientRequest request, CancellationToken cancellationToken = default)
+    public Task<PatientResponse> CreateAsync(CreatePatientRequest request, CancellationToken cancellationToken)
     {
         return _apiClient.PostAsync<CreatePatientRequest, PatientResponse>("api/patients", request, cancellationToken);
     }
 
-    public Task<PatientResponse> UpdateAsync(int id, UpdatePatientRequest request, CancellationToken cancellationToken = default)
+    public Task<PatientResponse> UpdateAsync(int id, UpdatePatientRequest request, CancellationToken cancellationToken)
     {
         return _apiClient.PutAsync<UpdatePatientRequest, PatientResponse>($"api/patients/{id}", request, cancellationToken);
     }
 
-    public Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+    public Task DeleteAsync(int id, CancellationToken cancellationToken)
     {
         return _apiClient.DeleteAsync($"api/patients/{id}", cancellationToken);
     }

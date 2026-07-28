@@ -16,6 +16,7 @@ namespace HospitalManagement.MVC.Controllers
             _doctorService = doctorService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index(DoctorFilterViewModel filter, CancellationToken cancellationToken)
         {
             var page = await _doctorService.GetAllAsync(filter, cancellationToken);
@@ -29,6 +30,7 @@ namespace HospitalManagement.MVC.Controllers
             });
         }
 
+        [HttpGet]
         public async Task<IActionResult> Details(int id, CancellationToken cancellationToken)
         {
             var doctor = await _doctorService.GetByIdAsync(id, cancellationToken);
@@ -36,6 +38,7 @@ namespace HospitalManagement.MVC.Controllers
             return View(doctor);
         }
 
+        [HttpGet]
         public IActionResult Create()
         {
             return View(new DoctorCreateViewModel());
@@ -62,6 +65,7 @@ namespace HospitalManagement.MVC.Controllers
             return RedirectToAction(nameof(Details), new { id = created.Id });
         }
 
+        [HttpGet]
         public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
             var doctor = await _doctorService.GetByIdAsync(id, cancellationToken);

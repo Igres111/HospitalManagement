@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<IDoctorService, DoctorService>();
         services.AddScoped<IPatientService, PatientService>();
         services.AddScoped<IAppointmentService, AppointmentService>();
+        services.AddScoped<IAppointmentOptionsProvider, AppointmentOptionsProvider>();
 
         services.AddHttpClient(ApiClientNames.HospitalApi, (serviceProvider, client) =>
         {

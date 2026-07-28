@@ -13,6 +13,7 @@ namespace HospitalManagement.MVC.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

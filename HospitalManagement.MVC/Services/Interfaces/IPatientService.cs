@@ -8,13 +8,13 @@ public interface IPatientService
 {
     Task<PagedResponse<PatientResponse>> GetAllAsync(
         PatientFilterViewModel filter,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken);
 
-    Task<PatientResponse> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<PatientResponse> GetByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task<PatientResponse> CreateAsync(CreatePatientRequest request, CancellationToken cancellationToken = default);
+    Task<PatientResponse> CreateAsync(CreatePatientRequest request, CancellationToken cancellationToken);
 
-    Task<PatientResponse> UpdateAsync(int id, UpdatePatientRequest request, CancellationToken cancellationToken = default);
+    Task<PatientResponse> UpdateAsync(int id, UpdatePatientRequest request, CancellationToken cancellationToken);
 
-    Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+    Task DeleteAsync(int id, CancellationToken cancellationToken);
 }

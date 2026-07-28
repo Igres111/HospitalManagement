@@ -21,25 +21,25 @@ namespace HospitalManagement.MVC.Services
             _httpClient = httpClientFactory.CreateClient(ApiClientNames.HospitalApi);
         }
 
-        public async Task<TResponse> GetAsync<TResponse>(string requestUri, CancellationToken cancellationToken = default)
+        public async Task<TResponse> GetAsync<TResponse>(string requestUri, CancellationToken cancellationToken)
         {
             using var response = await _httpClient.GetAsync(requestUri, cancellationToken);
             return await ReadResponseAsync<TResponse>(response, cancellationToken);
         }
 
-        public async Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest body, CancellationToken cancellationToken = default)
+        public async Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest body, CancellationToken cancellationToken)
         {
             using var response = await _httpClient.PostAsJsonAsync(requestUri, body, cancellationToken);
             return await ReadResponseAsync<TResponse>(response, cancellationToken);
         }
 
-        public async Task<TResponse> PutAsync<TRequest, TResponse>(string requestUri, TRequest body, CancellationToken cancellationToken = default)
+        public async Task<TResponse> PutAsync<TRequest, TResponse>(string requestUri, TRequest body, CancellationToken cancellationToken)
         {
             using var response = await _httpClient.PutAsJsonAsync(requestUri, body, cancellationToken);
             return await ReadResponseAsync<TResponse>(response, cancellationToken);
         }
 
-        public async Task DeleteAsync(string requestUri, CancellationToken cancellationToken = default)
+        public async Task DeleteAsync(string requestUri, CancellationToken cancellationToken)
         {
             using var response = await _httpClient.DeleteAsync(requestUri, cancellationToken);
 
@@ -71,7 +71,7 @@ namespace HospitalManagement.MVC.Services
                 error?.Details);
         }
 
-        public async Task PostAsync<TRequest>(string requestUri, TRequest body, CancellationToken cancellationToken = default)
+        public async Task PostAsync<TRequest>(string requestUri, TRequest body, CancellationToken cancellationToken)
         {
             using var response = await _httpClient.PostAsJsonAsync(requestUri, body, cancellationToken);
 
