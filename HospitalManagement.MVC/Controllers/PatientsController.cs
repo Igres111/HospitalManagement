@@ -1,57 +1,39 @@
-﻿using HospitalManagement.MVC.Auth;
+using HospitalManagement.MVC.Auth;
 using HospitalManagement.MVC.Dtos.Requests;
-using HospitalManagement.MVC.Dtos.Responses;
 using HospitalManagement.MVC.Models.Patients;
-using HospitalManagement.MVC.Services;
 using HospitalManagement.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace HospitalManagement.MVC.Controllers
 {
-
     public class PatientsController : Controller
     {
-        private readonly IApiClient _apiClient;
+        private readonly IPatientService _patientService;
 
-        public PatientsController(IApiClient apiClient)
+        public PatientsController(IPatientService patientService)
         {
-            _apiClient = apiClient;
+            _patientService = patientService;
         }
 
-        public async Task<IActionResult> Index(
-            string? search,
-            string? sortBy,
-            bool sortDescending = false,
-            int pageNumber = 1,
-            int pageSize = 10,
-            CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Index(PatientFilterViewModel filter, CancellationToken cancellationToken)
         {
-            var url = BuildPatientsQueryUrl(search, sortBy, sortDescending, pageNumber, pageSize);
-
-            var page = await _apiClient.GetAsync<PagedResponse<PatientResponse>>(url, cancellationToken);
+            var page = await _patientService.GetAllAsync(filter, cancellationToken);
 
             return View(new PatientIndexViewModel
             {
                 Page = page,
-                Search = search,
-                SortBy = sortBy,
-                SortDescending = sortDescending
+                Search = filter.Search,
+                SortBy = filter.SortBy,
+                SortDescending = filter.SortDescending
             });
         }
 
         public async Task<IActionResult> Details(int id, CancellationToken cancellationToken)
         {
-            try
-            {
-                var patient = await _apiClient.GetAsync<PatientResponse>($"api/patients/{id}", cancellationToken);
-                return View(patient);
-            }
-            catch (ApiException ex) when (ex.StatusCode == 404)
-            {
-                return NotFound();
-            }
+            var patient = await _patientService.GetByIdAsync(id, cancellationToken);
+
+            return View(patient);
         }
 
         public IActionResult Create()
@@ -68,47 +50,31 @@ namespace HospitalManagement.MVC.Controllers
                 return View(model);
             }
 
-            try
-            {
-                var request = new CreatePatientRequest(
-                    model.FirstName,
-                    model.LastName,
-                    model.DateOfBirth,
-                    model.PhoneNumber,
-                    model.Email);
+            var request = new CreatePatientRequest(
+                model.FirstName,
+                model.LastName,
+                model.DateOfBirth,
+                model.PhoneNumber,
+                model.Email);
 
-                var created = await _apiClient.PostAsync<CreatePatientRequest, PatientResponse>(
-                    "api/patients", request, cancellationToken);
+            var created = await _patientService.CreateAsync(request, cancellationToken);
 
-                return RedirectToAction(nameof(Details), new { id = created.Id });
-            }
-            catch (ApiException ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return View(model);
-            }
+            return RedirectToAction(nameof(Details), new { id = created.Id });
         }
 
         public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
-            try
-            {
-                var patient = await _apiClient.GetAsync<PatientResponse>($"api/patients/{id}", cancellationToken);
+            var patient = await _patientService.GetByIdAsync(id, cancellationToken);
 
-                return View(new PatientEditViewModel
-                {
-                    Id = patient.Id,
-                    FirstName = patient.FirstName,
-                    LastName = patient.LastName,
-                    DateOfBirth = patient.DateOfBirth,
-                    PhoneNumber = patient.PhoneNumber,
-                    Email = patient.Email
-                });
-            }
-            catch (ApiException ex) when (ex.StatusCode == 404)
+            return View(new PatientEditViewModel
             {
-                return NotFound();
-            }
+                Id = patient.Id,
+                FirstName = patient.FirstName,
+                LastName = patient.LastName,
+                DateOfBirth = patient.DateOfBirth,
+                PhoneNumber = patient.PhoneNumber,
+                Email = patient.Email
+            });
         }
 
         [HttpPost]
@@ -125,25 +91,16 @@ namespace HospitalManagement.MVC.Controllers
                 return View(model);
             }
 
-            try
-            {
-                var request = new UpdatePatientRequest(
-                    model.FirstName,
-                    model.LastName,
-                    model.DateOfBirth,
-                    model.PhoneNumber,
-                    model.Email);
+            var request = new UpdatePatientRequest(
+                model.FirstName,
+                model.LastName,
+                model.DateOfBirth,
+                model.PhoneNumber,
+                model.Email);
 
-                await _apiClient.PutAsync<UpdatePatientRequest, PatientResponse>(
-                    $"api/patients/{id}", request, cancellationToken);
+            await _patientService.UpdateAsync(id, request, cancellationToken);
 
-                return RedirectToAction(nameof(Details), new { id });
-            }
-            catch (ApiException ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return View(model);
-            }
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         [HttpPost]
@@ -151,39 +108,9 @@ namespace HospitalManagement.MVC.Controllers
         [Authorize(Roles = AppRoles.Administrator)]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            try
-            {
-                await _apiClient.DeleteAsync($"api/patients/{id}", cancellationToken);
-            }
-            catch (ApiException ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
-            }
+            await _patientService.DeleteAsync(id, cancellationToken);
 
             return RedirectToAction(nameof(Index));
-        }
-
-        private static string BuildPatientsQueryUrl(
-            string? search, string? sortBy, bool sortDescending, int pageNumber, int pageSize)
-        {
-            var queryParams = new Dictionary<string, string?>
-            {
-                ["pageNumber"] = pageNumber.ToString(),
-                ["pageSize"] = pageSize.ToString(),
-                ["sortDescending"] = sortDescending.ToString()
-            };
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                queryParams["search"] = search;
-            }
-
-            if (!string.IsNullOrWhiteSpace(sortBy))
-            {
-                queryParams["sortBy"] = sortBy;
-            }
-
-            return QueryHelpers.AddQueryString("api/patients", queryParams);
         }
     }
 }

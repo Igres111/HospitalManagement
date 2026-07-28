@@ -2,7 +2,6 @@
 using HospitalManagement.MVC.Dtos.Requests;
 using HospitalManagement.MVC.Dtos.Responses;
 using HospitalManagement.MVC.Models.Account;
-using HospitalManagement.MVC.Services;
 using HospitalManagement.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -40,20 +39,10 @@ namespace HospitalManagement.MVC.Controllers
                 return View(model);
             }
 
-            AuthResponse loginResponse;
-
-            try
-            {
-                loginResponse = await _apiClient.PostAsync<AuthRequest, AuthResponse>(
-                    "api/auth/login",
-                    new AuthRequest(model.Username, model.Password),
-                    cancellationToken);
-            }
-            catch (ApiException ex) when (ex.StatusCode == 401)
-            {
-                ModelState.AddModelError(string.Empty, "Invalid username or password.");
-                return View(model);
-            }
+            var loginResponse = await _apiClient.PostAsync<AuthRequest, AuthResponse>(
+                "api/auth/login",
+                new AuthRequest(model.Username, model.Password),
+                cancellationToken);
 
             var principal = BuildPrincipal(loginResponse);
 

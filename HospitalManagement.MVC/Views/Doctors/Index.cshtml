@@ -20,11 +20,6 @@
 
 <h1>Doctors</h1>
 
-@if (TempData["ErrorMessage"] is string errorMessage)
-{
-    <div class="alert alert-danger">@errorMessage</div>
-}
-
 <p>
     <a class="btn btn-primary" asp-action="Create">Create New</a>
 </p>
