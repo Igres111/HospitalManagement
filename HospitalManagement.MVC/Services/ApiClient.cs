@@ -2,6 +2,7 @@
 using HospitalManagement.MVC.Options;
 using HospitalManagement.MVC.Services.Interfaces;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HospitalManagement.MVC.Services
 {
@@ -9,7 +10,8 @@ namespace HospitalManagement.MVC.Services
     {
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter() }
         };
 
         private readonly HttpClient _httpClient;

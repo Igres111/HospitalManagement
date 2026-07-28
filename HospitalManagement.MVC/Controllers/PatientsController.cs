@@ -53,7 +53,7 @@ namespace HospitalManagement.MVC.Controllers
             var request = new CreatePatientRequest(
                 model.FirstName,
                 model.LastName,
-                model.DateOfBirth,
+                model.DateOfBirth!.Value,
                 model.PhoneNumber,
                 model.Email);
 

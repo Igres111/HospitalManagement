@@ -1,0 +1,45 @@
+﻿@model HospitalManagement.MVC.Models.Appointments.AppointmentEditViewModel
+
+@{
+    ViewData["Title"] = "Edit Appointment";
+}
+
+<h1>Edit Appointment</h1>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="DoctorId"></label>
+        <select asp-for="DoctorId" class="form-select" asp-items="Model.DoctorOptions"></select>
+        <span asp-validation-for="DoctorId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PatientId"></label>
+        <select asp-for="PatientId" class="form-select" asp-items="Model.PatientOptions"></select>
+        <span asp-validation-for="PatientId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AppointmentDate"></label>
+        <input asp-for="AppointmentDate" type="datetime-local" step="60" class="form-control" />
+        <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Status"></label>
+        <select asp-for="Status" class="form-select" asp-items="Model.StatusOptions"></select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

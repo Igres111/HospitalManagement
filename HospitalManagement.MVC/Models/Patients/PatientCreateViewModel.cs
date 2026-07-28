@@ -14,7 +14,7 @@ namespace HospitalManagement.MVC.Models.Patients
 
         [Required(ErrorMessage = "Date of birth is required.")]
         [DataType(DataType.Date)]
-        public DateOnly DateOfBirth { get; set; }
+        public DateOnly? DateOfBirth { get; set; }
 
         [MaxLength(30, ErrorMessage = "Phone number cannot exceed 30 characters.")]
         public string? PhoneNumber { get; set; }

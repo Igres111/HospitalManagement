@@ -1,0 +1,124 @@
+﻿@model HospitalManagement.MVC.Models.Appointments.AppointmentIndexViewModel
+@using HospitalManagement.MVC.Dtos
+
+@{
+    ViewData["Title"] = "Appointments";
+
+    Func<string, string> sortUrl = column =>
+    {
+        var desc = Model.Filter.SortBy == column && !Model.Filter.SortDescending;
+        return Url.Action("Index", new
+        {
+            doctorId = Model.Filter.DoctorId,
+            patientId = Model.Filter.PatientId,
+            status = Model.Filter.Status,
+            dateFrom = Model.Filter.DateFrom,
+            dateTo = Model.Filter.DateTo,
+            sortBy = column,
+            sortDescending = desc,
+            pageNumber = 1,
+            pageSize = Model.Page.PageSize
+        })!;
+    };
+}
+
+<h1>Appointments</h1>
+
+<p>
+    <a class="btn btn-primary" asp-action="Create">Create New</a>
+</p>
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <select name="DoctorId" class="form-select" asp-items="Model.DoctorOptions">
+            <option value="">All Doctors</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <select name="PatientId" class="form-select" asp-items="Model.PatientOptions">
+            <option value="">All Patients</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <select name="Status" class="form-select" asp-items="Model.StatusOptions">
+            <option value="">All Statuses</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <input type="date" name="DateFrom" class="form-control" />
+    </div>
+    <div class="col-auto">
+        <input type="date" name="DateTo" class="form-control" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th><a href="@sortUrl("doctorName")">Doctor</a></th>
+            <th><a href="@sortUrl("patientName")">Patient</a></th>
+            <th><a href="@sortUrl("appointmentDate")">Date</a></th>
+            <th><a href="@sortUrl("status")">Status</a></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var appointment in Model.Page.Items)
+        {
+            <tr>
+                <td>@appointment.DoctorName @appointment.DoctorLastName</td>
+                <td>@appointment.PatientName @appointment.PatientLastName</td>
+                <td>@appointment.AppointmentDate.ToString("g")</td>
+                <td>@appointment.Status</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@appointment.Id">Details</a>
+                    @if (appointment.Status != AppointmentStatus.Completed && appointment.Status != AppointmentStatus.Cancelled)
+                    {
+                        <text> | </text>
+                        <a asp-action="Edit" asp-route-id="@appointment.Id">Edit</a>
+                    }
+                    @if (appointment.Status != AppointmentStatus.Completed)
+                    {
+                        <text> | </text>
+                        <form asp-action="Delete" asp-route-id="@appointment.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this appointment?');">
+                            <button type="submit" class="btn btn-link p-0 text-danger">Delete</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    @if (Model.Page.HasPreviousPage)
+    {
+        <a asp-action="Index"
+           asp-route-doctorId="@Model.Filter.DoctorId"
+           asp-route-patientId="@Model.Filter.PatientId"
+           asp-route-status="@Model.Filter.Status"
+           asp-route-dateFrom="@Model.Filter.DateFrom"
+           asp-route-dateTo="@Model.Filter.DateTo"
+           asp-route-sortBy="@Model.Filter.SortBy"
+           asp-route-sortDescending="@Model.Filter.SortDescending"
+           asp-route-pageNumber="@(Model.Page.PageNumber - 1)"
+           asp-route-pageSize="@Model.Page.PageSize">Previous</a>
+    }
+    <span>Page @Model.Page.PageNumber of @Model.Page.TotalPages</span>
+    @if (Model.Page.HasNextPage)
+    {
+        <a asp-action="Index"
+           asp-route-doctorId="@Model.Filter.DoctorId"
+           asp-route-patientId="@Model.Filter.PatientId"
+           asp-route-status="@Model.Filter.Status"
+           asp-route-dateFrom="@Model.Filter.DateFrom"
+           asp-route-dateTo="@Model.Filter.DateTo"
+           asp-route-sortBy="@Model.Filter.SortBy"
+           asp-route-sortDescending="@Model.Filter.SortDescending"
+           asp-route-pageNumber="@(Model.Page.PageNumber + 1)"
+           asp-route-pageSize="@Model.Page.PageSize">Next</a>
+    }
+</div>

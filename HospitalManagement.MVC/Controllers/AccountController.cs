@@ -53,7 +53,7 @@ namespace HospitalManagement.MVC.Controllers
                 return Redirect(model.ReturnUrl);
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Appointments");
         }
 
         [HttpPost]
