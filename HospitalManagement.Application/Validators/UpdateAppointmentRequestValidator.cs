@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using HospitalManagement.Application.Requests;
+using HospitalManagement.Domain.Enums;
 
 namespace HospitalManagement.Application.Validators
 {
@@ -24,7 +25,10 @@ namespace HospitalManagement.Application.Validators
             RuleFor(request => request.AppointmentDate)
                 .GreaterThan(DateTime.UtcNow)
                 .WithMessage("Appointment date must be in the future.")
-                .When(request => request.AppointmentDate is not null);
+                .When(request =>
+                    request.AppointmentDate is not null &&
+                    request.Status != AppointmentStatus.Completed &&
+                    request.Status != AppointmentStatus.Cancelled);
 
             RuleFor(request => request.Status)
                 .IsInEnum()

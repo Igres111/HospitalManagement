@@ -26,7 +26,7 @@ namespace HospitalManagement.Infrastructure.Implementations
             return Context.Appointments.AnyAsync(
                 appointment =>
                     appointment.DoctorId == doctorId &&
-                    appointment.Status == AppointmentStatus.Scheduled &&
+                    (appointment.Status == AppointmentStatus.Scheduled || appointment.Status == AppointmentStatus.Cancelled) &&
                     appointment.DeletedAt == null &&
                     appointment.AppointmentDate < newAppointmentEnd &&
                     appointment.AppointmentDate
@@ -46,7 +46,7 @@ namespace HospitalManagement.Infrastructure.Implementations
                 appointment =>
                     appointment.Id != excludedAppointmentId &&
                     appointment.DoctorId == doctorId &&
-                    appointment.Status == AppointmentStatus.Scheduled &&
+                    (appointment.Status == AppointmentStatus.Scheduled || appointment.Status == AppointmentStatus.Cancelled) &&
                     appointment.DeletedAt == null &&
                     appointment.AppointmentDate < newAppointmentEnd &&
                     appointment.AppointmentDate
