@@ -1,6 +1,6 @@
 using HospitalManagement.MVC.Dtos.Requests;
+using HospitalManagement.MVC.Extensions;
 using HospitalManagement.MVC.Models.Appointments;
-using HospitalManagement.MVC.Services;
 using HospitalManagement.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,12 +22,17 @@ namespace HospitalManagement.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(AppointmentFilterViewModel filter, CancellationToken cancellationToken)
         {
-            var page = await _appointmentService.GetAllAsync(filter, cancellationToken);
+            var result = await _appointmentService.GetAllAsync(filter, cancellationToken);
+
+            if (result.IsError)
+            {
+                return this.RedirectToApiError(result);
+            }
 
             return View(new AppointmentIndexViewModel
             {
                 Filter = filter,
-                Page = page,
+                Page = result.Value!,
                 DoctorOptions = await _appointmentOptionsProvider.GetDoctorOptionsAsync(cancellationToken),
                 PatientOptions = await _appointmentOptionsProvider.GetPatientOptionsAsync(cancellationToken),
                 StatusOptions = _appointmentOptionsProvider.GetStatusOptions()
@@ -37,9 +42,14 @@ namespace HospitalManagement.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id, CancellationToken cancellationToken)
         {
-            var appointment = await _appointmentService.GetByIdAsync(id, cancellationToken);
+            var result = await _appointmentService.GetByIdAsync(id, cancellationToken);
 
-            return View(appointment);
+            if (result.IsError)
+            {
+                return this.RedirectToApiError(result);
+            }
+
+            return View(result.Value);
         }
 
         [HttpGet]
@@ -68,26 +78,31 @@ namespace HospitalManagement.MVC.Controllers
 
             var request = new CreateAppointmentRequest(model.DoctorId, model.PatientId, model.AppointmentDate);
 
-            try
-            {
-                var created = await _appointmentService.CreateAsync(request, cancellationToken);
+            var result = await _appointmentService.CreateAsync(request, cancellationToken);
 
-                return RedirectToAction(nameof(Details), new { id = created.Id });
-            }
-            catch (ApiException ex)
+            if (result.IsError)
             {
                 model.DoctorOptions = await _appointmentOptionsProvider.GetDoctorOptionsAsync(cancellationToken);
                 model.PatientOptions = await _appointmentOptionsProvider.GetPatientOptionsAsync(cancellationToken);
-                ViewBag.ApiErrorMessage = ex.Message;
+                ViewBag.ApiErrorMessage = result.ErrorMessage;
                 ViewBag.ApiErrorModalTitle = "Unable to Create Appointment";
                 return View(model);
             }
+
+            return RedirectToAction(nameof(Details), new { id = result.Value!.Id });
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
-            var appointment = await _appointmentService.GetByIdAsync(id, cancellationToken);
+            var result = await _appointmentService.GetByIdAsync(id, cancellationToken);
+
+            if (result.IsError)
+            {
+                return this.RedirectToApiError(result);
+            }
+
+            var appointment = result.Value!;
 
             return View(new AppointmentEditViewModel
             {
@@ -121,48 +136,51 @@ namespace HospitalManagement.MVC.Controllers
 
             var request = new UpdateAppointmentRequest(model.DoctorId, model.PatientId, model.AppointmentDate, model.Status);
 
-            try
-            {
-                await _appointmentService.UpdateAsync(id, request, cancellationToken);
+            var result = await _appointmentService.UpdateAsync(id, request, cancellationToken);
 
-                return RedirectToAction(nameof(Details), new { id });
-            }
-            catch (ApiException ex)
+            if (result.IsError)
             {
                 model.DoctorOptions = await _appointmentOptionsProvider.GetDoctorOptionsAsync(cancellationToken);
                 model.PatientOptions = await _appointmentOptionsProvider.GetPatientOptionsAsync(cancellationToken);
                 model.StatusOptions = _appointmentOptionsProvider.GetStatusOptions();
-                ViewBag.ApiErrorMessage = ex.Message;
+                ViewBag.ApiErrorMessage = result.ErrorMessage;
                 ViewBag.ApiErrorModalTitle = "Unable to Update Appointment";
                 return View(model);
             }
+
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            try
-            {
-                await _appointmentService.DeleteAsync(id, cancellationToken);
+            var deleteResult = await _appointmentService.DeleteAsync(id, cancellationToken);
 
+            if (!deleteResult.IsError)
+            {
                 return RedirectToAction(nameof(Index));
             }
-            catch (ApiException ex)
+
+            var filter = new AppointmentFilterViewModel();
+            var pageResult = await _appointmentService.GetAllAsync(filter, cancellationToken);
+
+            if (pageResult.IsError)
             {
-                var filter = new AppointmentFilterViewModel();
-                var page = await _appointmentService.GetAllAsync(filter, cancellationToken);
-                ViewBag.ApiErrorMessage = ex.Message;
-                ViewBag.ApiErrorModalTitle = "Unable to Delete Appointment";
-                return View(nameof(Index), new AppointmentIndexViewModel
-                {
-                    Filter = filter,
-                    Page = page,
-                    DoctorOptions = await _appointmentOptionsProvider.GetDoctorOptionsAsync(cancellationToken),
-                    PatientOptions = await _appointmentOptionsProvider.GetPatientOptionsAsync(cancellationToken),
-                    StatusOptions = _appointmentOptionsProvider.GetStatusOptions()
-                });
+                return this.RedirectToApiError(pageResult);
             }
+
+            ViewBag.ApiErrorMessage = deleteResult.ErrorMessage;
+            ViewBag.ApiErrorModalTitle = "Unable to Delete Appointment";
+
+            return View(nameof(Index), new AppointmentIndexViewModel
+            {
+                Filter = filter,
+                Page = pageResult.Value!,
+                DoctorOptions = await _appointmentOptionsProvider.GetDoctorOptionsAsync(cancellationToken),
+                PatientOptions = await _appointmentOptionsProvider.GetPatientOptionsAsync(cancellationToken),
+                StatusOptions = _appointmentOptionsProvider.GetStatusOptions()
+            });
         }
     }
 }

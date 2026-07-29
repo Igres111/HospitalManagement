@@ -1,4 +1,3 @@
-using HospitalManagement.MVC.Services;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.Net;
 
@@ -47,26 +46,11 @@ public sealed class ExceptionHandlingMiddleware
 
     private void HandleException(HttpContext context, Exception exception)
     {
-        var statusCode = GetStatusCode(exception);
-        var message = GetMessage(exception);
-
-        if (statusCode == HttpStatusCode.InternalServerError)
-        {
-            _logger.LogError(
-                exception,
-                "Unhandled exception occurred while processing {Method} {Path}",
-                context.Request.Method,
-                context.Request.Path);
-        }
-        else
-        {
-            _logger.LogWarning(
-                exception,
-                "Request {Method} {Path} failed with {StatusCode}",
-                context.Request.Method,
-                context.Request.Path,
-                (int)statusCode);
-        }
+        _logger.LogError(
+            exception,
+            "Unhandled exception occurred while processing {Method} {Path}",
+            context.Request.Method,
+            context.Request.Path);
 
         context.Response.Clear();
 
@@ -74,26 +58,10 @@ public sealed class ExceptionHandlingMiddleware
             .GetRequiredService<ITempDataDictionaryFactory>()
             .GetTempData(context);
 
-        tempData["ErrorStatusCode"] = (int)statusCode;
-        tempData["ErrorMessage"] = message;
+        tempData["ErrorStatusCode"] = (int)HttpStatusCode.InternalServerError;
+        tempData["ErrorMessage"] = "An unexpected error occurred.";
         tempData.Save();
 
         context.Response.Redirect("/Home/Error");
-    }
-
-    private static HttpStatusCode GetStatusCode(Exception exception)
-    {
-        return exception switch
-        {
-            ApiException apiException => (HttpStatusCode)apiException.StatusCode,
-            _ => HttpStatusCode.InternalServerError
-        };
-    }
-
-    private static string GetMessage(Exception exception)
-    {
-        return exception is ApiException apiException
-            ? apiException.Message
-            : "An unexpected error occurred.";
     }
 }

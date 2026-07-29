@@ -19,22 +19,32 @@ public class AppointmentOptionsProvider : IAppointmentOptionsProvider
 
     public async Task<IEnumerable<SelectListItem>> GetDoctorOptionsAsync(CancellationToken cancellationToken)
     {
-        var doctors = await _doctorService.GetAllAsync(
+        var result = await _doctorService.GetAllAsync(
             new DoctorFilterViewModel { PageSize = 50 },
             cancellationToken);
 
-        return doctors.Items.Select(doctor => new SelectListItem(
+        if (result.IsError)
+        {
+            return Enumerable.Empty<SelectListItem>();
+        }
+
+        return result.Value!.Items.Select(doctor => new SelectListItem(
             $"{doctor.FirstName} {doctor.LastName}",
             doctor.Id.ToString()));
     }
 
     public async Task<IEnumerable<SelectListItem>> GetPatientOptionsAsync(CancellationToken cancellationToken)
     {
-        var patients = await _patientService.GetAllAsync(
+        var result = await _patientService.GetAllAsync(
             new PatientFilterViewModel { PageSize = 50 },
             cancellationToken);
 
-        return patients.Items.Select(patient => new SelectListItem(
+        if (result.IsError)
+        {
+            return Enumerable.Empty<SelectListItem>();
+        }
+
+        return result.Value!.Items.Select(patient => new SelectListItem(
             $"{patient.FirstName} {patient.LastName}",
             patient.Id.ToString()));
     }

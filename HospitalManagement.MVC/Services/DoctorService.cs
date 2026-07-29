@@ -1,4 +1,3 @@
-using HospitalManagement.MVC.Dtos.Requests;
 using HospitalManagement.MVC.Dtos.Responses;
 using HospitalManagement.MVC.Models.Doctors;
 using HospitalManagement.MVC.Services.Interfaces;
@@ -15,7 +14,7 @@ public class DoctorService : IDoctorService
         _apiClient = apiClient;
     }
 
-    public Task<PagedResponse<DoctorResponse>> GetAllAsync(
+    public Task<ApiResult<PagedResponse<DoctorResponse>>> GetAllAsync(
         DoctorFilterViewModel filter,
         CancellationToken cancellationToken)
     {
@@ -24,22 +23,22 @@ public class DoctorService : IDoctorService
         return _apiClient.GetAsync<PagedResponse<DoctorResponse>>(url, cancellationToken);
     }
 
-    public Task<DoctorResponse> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public Task<ApiResult<DoctorResponse>> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         return _apiClient.GetAsync<DoctorResponse>($"api/doctors/{id}", cancellationToken);
     }
 
-    public Task<DoctorResponse> CreateAsync(CreateDoctorRequest request, CancellationToken cancellationToken)
+    public Task<ApiResult<DoctorResponse>> CreateAsync(DoctorCreateViewModel model, CancellationToken cancellationToken)
     {
-        return _apiClient.PostAsync<CreateDoctorRequest, DoctorResponse>("api/doctors", request, cancellationToken);
+        return _apiClient.PostAsync<DoctorCreateViewModel, DoctorResponse>("api/doctors", model, cancellationToken);
     }
 
-    public Task<DoctorResponse> UpdateAsync(int id, UpdateDoctorRequest request, CancellationToken cancellationToken)
+    public Task<ApiResult<DoctorResponse>> UpdateAsync(int id, DoctorEditViewModel model, CancellationToken cancellationToken)
     {
-        return _apiClient.PutAsync<UpdateDoctorRequest, DoctorResponse>($"api/doctors/{id}", request, cancellationToken);
+        return _apiClient.PutAsync<DoctorEditViewModel, DoctorResponse>($"api/doctors/{id}", model, cancellationToken);
     }
 
-    public Task DeleteAsync(int id, CancellationToken cancellationToken)
+    public Task<ApiResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
         return _apiClient.DeleteAsync($"api/doctors/{id}", cancellationToken);
     }

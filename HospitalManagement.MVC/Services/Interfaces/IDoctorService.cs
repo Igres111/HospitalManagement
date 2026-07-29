@@ -1,20 +1,20 @@
-using HospitalManagement.MVC.Dtos.Requests;
 using HospitalManagement.MVC.Dtos.Responses;
 using HospitalManagement.MVC.Models.Doctors;
+using HospitalManagement.MVC.Services;
 
 namespace HospitalManagement.MVC.Services.Interfaces;
 
 public interface IDoctorService
 {
-    Task<PagedResponse<DoctorResponse>> GetAllAsync(
+    Task<ApiResult<PagedResponse<DoctorResponse>>> GetAllAsync(
         DoctorFilterViewModel filter,
         CancellationToken cancellationToken);
 
-    Task<DoctorResponse> GetByIdAsync(int id, CancellationToken cancellationToken);
+    Task<ApiResult<DoctorResponse>> GetByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task<DoctorResponse> CreateAsync(CreateDoctorRequest request, CancellationToken cancellationToken);
+    Task<ApiResult<DoctorResponse>> CreateAsync(DoctorCreateViewModel model, CancellationToken cancellationToken);
 
-    Task<DoctorResponse> UpdateAsync(int id, UpdateDoctorRequest request, CancellationToken cancellationToken);
+    Task<ApiResult<DoctorResponse>> UpdateAsync(int id, DoctorEditViewModel model, CancellationToken cancellationToken);
 
-    Task DeleteAsync(int id, CancellationToken cancellationToken);
+    Task<ApiResult> DeleteAsync(int id, CancellationToken cancellationToken);
 }

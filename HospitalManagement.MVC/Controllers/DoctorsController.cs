@@ -1,7 +1,6 @@
 using HospitalManagement.MVC.Auth;
-using HospitalManagement.MVC.Dtos.Requests;
+using HospitalManagement.MVC.Extensions;
 using HospitalManagement.MVC.Models.Doctors;
-using HospitalManagement.MVC.Services;
 using HospitalManagement.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,11 +19,16 @@ namespace HospitalManagement.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(DoctorFilterViewModel filter, CancellationToken cancellationToken)
         {
-            var page = await _doctorService.GetAllAsync(filter, cancellationToken);
+            var result = await _doctorService.GetAllAsync(filter, cancellationToken);
+
+            if (result.IsError)
+            {
+                return this.RedirectToApiError(result);
+            }
 
             return View(new DoctorIndexViewModel
             {
-                Page = page,
+                Page = result.Value!,
                 Search = filter.Search,
                 SortBy = filter.SortBy,
                 SortDescending = filter.SortDescending
@@ -34,9 +38,14 @@ namespace HospitalManagement.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id, CancellationToken cancellationToken)
         {
-            var doctor = await _doctorService.GetByIdAsync(id, cancellationToken);
+            var result = await _doctorService.GetByIdAsync(id, cancellationToken);
 
-            return View(doctor);
+            if (result.IsError)
+            {
+                return this.RedirectToApiError(result);
+            }
+
+            return View(result.Value);
         }
 
         [HttpGet]
@@ -54,31 +63,29 @@ namespace HospitalManagement.MVC.Controllers
                 return View(model);
             }
 
-            var request = new CreateDoctorRequest(
-                model.FirstName,
-                model.LastName,
-                model.Specialization,
-                model.PhoneNumber,
-                model.Email);
+            var result = await _doctorService.CreateAsync(model, cancellationToken);
 
-            try
+            if (result.IsError)
             {
-                var created = await _doctorService.CreateAsync(request, cancellationToken);
-
-                return RedirectToAction(nameof(Details), new { id = created.Id });
-            }
-            catch (ApiException ex)
-            {
-                ViewBag.ApiErrorMessage = ex.Message;
+                ViewBag.ApiErrorMessage = result.ErrorMessage;
                 ViewBag.ApiErrorModalTitle = "Unable to Create Doctor";
                 return View(model);
             }
+
+            return RedirectToAction(nameof(Details), new { id = result.Value!.Id });
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
         {
-            var doctor = await _doctorService.GetByIdAsync(id, cancellationToken);
+            var result = await _doctorService.GetByIdAsync(id, cancellationToken);
+
+            if (result.IsError)
+            {
+                return this.RedirectToApiError(result);
+            }
+
+            var doctor = result.Value!;
 
             return View(new DoctorEditViewModel
             {
@@ -105,25 +112,16 @@ namespace HospitalManagement.MVC.Controllers
                 return View(model);
             }
 
-            var request = new UpdateDoctorRequest(
-                model.FirstName,
-                model.LastName,
-                model.Specialization,
-                model.PhoneNumber,
-                model.Email);
+            var result = await _doctorService.UpdateAsync(id, model, cancellationToken);
 
-            try
+            if (result.IsError)
             {
-                await _doctorService.UpdateAsync(id, request, cancellationToken);
-
-                return RedirectToAction(nameof(Details), new { id });
-            }
-            catch (ApiException ex)
-            {
-                ViewBag.ApiErrorMessage = ex.Message;
+                ViewBag.ApiErrorMessage = result.ErrorMessage;
                 ViewBag.ApiErrorModalTitle = "Unable to Update Doctor";
                 return View(model);
             }
+
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         [HttpPost]
@@ -131,26 +129,31 @@ namespace HospitalManagement.MVC.Controllers
         [Authorize(Roles = AppRoles.Administrator)]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            try
-            {
-                await _doctorService.DeleteAsync(id, cancellationToken);
+            var deleteResult = await _doctorService.DeleteAsync(id, cancellationToken);
 
+            if (!deleteResult.IsError)
+            {
                 return RedirectToAction(nameof(Index));
             }
-            catch (ApiException ex)
+
+            var filter = new DoctorFilterViewModel();
+            var pageResult = await _doctorService.GetAllAsync(filter, cancellationToken);
+
+            if (pageResult.IsError)
             {
-                var filter = new DoctorFilterViewModel();
-                var page = await _doctorService.GetAllAsync(filter, cancellationToken);
-                ViewBag.ApiErrorMessage = ex.Message;
-                ViewBag.ApiErrorModalTitle = "Unable to Delete Doctor";
-                return View(nameof(Index), new DoctorIndexViewModel
-                {
-                    Page = page,
-                    Search = filter.Search,
-                    SortBy = filter.SortBy,
-                    SortDescending = filter.SortDescending
-                });
+                return this.RedirectToApiError(pageResult);
             }
+
+            ViewBag.ApiErrorMessage = deleteResult.ErrorMessage;
+            ViewBag.ApiErrorModalTitle = "Unable to Delete Doctor";
+
+            return View(nameof(Index), new DoctorIndexViewModel
+            {
+                Page = pageResult.Value!,
+                Search = filter.Search,
+                SortBy = filter.SortBy,
+                SortDescending = filter.SortDescending
+            });
         }
     }
 }

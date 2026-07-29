@@ -1,14 +1,12 @@
-﻿using HospitalManagement.MVC.Auth;
+using HospitalManagement.MVC.Auth;
 using HospitalManagement.MVC.Dtos.Requests;
 using HospitalManagement.MVC.Dtos.Responses;
 using HospitalManagement.MVC.Models.Account;
-using HospitalManagement.MVC.Services;
 using HospitalManagement.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace HospitalManagement.MVC.Controllers
 {
@@ -38,22 +36,25 @@ namespace HospitalManagement.MVC.Controllers
                 return View(model);
             }
 
-            AuthResponse loginResponse;
+            var result = await _apiClient.PostAsync<AuthRequest, AuthResponse>(
+                "api/auth/login",
+                new AuthRequest(model.Username, model.Password),
+                cancellationToken);
 
-            try
+            if (result.IsError)
             {
-                loginResponse = await _apiClient.PostAsync<AuthRequest, AuthResponse>(
-                    "api/auth/login",
-                    new AuthRequest(model.Username, model.Password),
-                    cancellationToken);
-            }
-            catch (ApiException ex) when (ex.StatusCode == 401)
-            {
-                ModelState.AddModelError(nameof(model.Password), "Wrong password or username.");
-                return View(model);
+                if (result.StatusCode == 401)
+                {
+                    ModelState.AddModelError(nameof(model.Password), "Wrong password or username.");
+                    return View(model);
+                }
+
+                TempData["ErrorStatusCode"] = result.StatusCode;
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                return RedirectToAction("Error", "Home");
             }
 
-            var principal = ClaimsPrincipalFactory.BuildPrincipal(loginResponse);
+            var principal = ClaimsPrincipalFactory.BuildPrincipal(result.Value!);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
@@ -80,17 +81,22 @@ namespace HospitalManagement.MVC.Controllers
                 return View(model);
             }
 
-            try
+            var result = await _apiClient.PostAsync<RegisterViewModel, RegisterResponse>(
+                "api/auth/register",
+                model,
+                cancellationToken);
+
+            if (result.IsError)
             {
-                await _apiClient.PostAsync<RegisterRequest, RegisterResponse>(
-                    "api/auth/register",
-                    new RegisterRequest(model.Username, model.Password, model.ConfirmPassword),
-                    cancellationToken);
-            }
-            catch (ApiException ex) when (ex.StatusCode == 409)
-            {
-                ModelState.AddModelError(nameof(model.Username), ex.Message);
-                return View(model);
+                if (result.StatusCode == 409)
+                {
+                    ModelState.AddModelError(nameof(model.Username), result.ErrorMessage!);
+                    return View(model);
+                }
+
+                TempData["ErrorStatusCode"] = result.StatusCode;
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                return RedirectToAction("Error", "Home");
             }
 
             TempData["SuccessMessage"] = "Registration successful. You can now log in.";
@@ -106,14 +112,7 @@ namespace HospitalManagement.MVC.Controllers
 
             if (!string.IsNullOrEmpty(refreshToken))
             {
-                try
-                {
-                    await _apiClient.PostAsync("api/auth/logout", new RefreshTokenRequest(refreshToken), cancellationToken);
-                }
-                catch (ApiException)
-                {
-
-                }
+                await _apiClient.PostAsync("api/auth/logout", new RefreshTokenRequest(refreshToken), cancellationToken);
             }
 
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
