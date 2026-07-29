@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HospitalManagement.MVC.Controllers
 {
-
     [AllowAnonymous]
     public class AccountController : Controller
     {

@@ -3,66 +3,67 @@ using HospitalManagement.MVC.Models.Patients;
 using HospitalManagement.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace HospitalManagement.MVC.Services;
-
-public class PatientService : IPatientService
+namespace HospitalManagement.MVC.Services
 {
-    private readonly IApiClient _apiClient;
-
-    public PatientService(IApiClient apiClient)
+    public class PatientService : IPatientService
     {
-        _apiClient = apiClient;
-    }
+        private readonly IApiClient _apiClient;
 
-    public Task<ApiResult<PagedResponse<PatientResponse>>> GetAllAsync(
-        PatientFilterViewModel filter,
-        CancellationToken cancellationToken)
-    {
-        var url = BuildQueryUrl(filter.Search, filter.SortBy, filter.SortDescending, filter.PageNumber, filter.PageSize);
-
-        return _apiClient.GetAsync<PagedResponse<PatientResponse>>(url, cancellationToken);
-    }
-
-    public Task<ApiResult<PatientResponse>> GetByIdAsync(int id, CancellationToken cancellationToken)
-    {
-        return _apiClient.GetAsync<PatientResponse>($"api/patients/{id}", cancellationToken);
-    }
-
-    public Task<ApiResult<PatientResponse>> CreateAsync(PatientCreateViewModel model, CancellationToken cancellationToken)
-    {
-        return _apiClient.PostAsync<PatientCreateViewModel, PatientResponse>("api/patients", model, cancellationToken);
-    }
-
-    public Task<ApiResult<PatientResponse>> UpdateAsync(int id, PatientEditViewModel model, CancellationToken cancellationToken)
-    {
-        return _apiClient.PutAsync<PatientEditViewModel, PatientResponse>($"api/patients/{id}", model, cancellationToken);
-    }
-
-    public Task<ApiResult> DeleteAsync(int id, CancellationToken cancellationToken)
-    {
-        return _apiClient.DeleteAsync($"api/patients/{id}", cancellationToken);
-    }
-
-    private static string BuildQueryUrl(
-        string? search, string? sortBy, bool sortDescending, int pageNumber, int pageSize)
-    {
-        var queryParams = new Dictionary<string, string?>
+        public PatientService(IApiClient apiClient)
         {
-            ["pageNumber"] = pageNumber.ToString(),
-            ["pageSize"] = pageSize.ToString(),
-            ["sortDescending"] = sortDescending.ToString()
-        };
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            queryParams["search"] = search;
+            _apiClient = apiClient;
         }
 
-        if (!string.IsNullOrWhiteSpace(sortBy))
+        public Task<ApiResult<PagedResponse<PatientResponse>>> GetAllAsync(
+            PatientFilterViewModel filter,
+            CancellationToken cancellationToken)
         {
-            queryParams["sortBy"] = sortBy;
+            var url = BuildQueryUrl(filter.Search, filter.SortBy, filter.SortDescending, filter.PageNumber, filter.PageSize);
+
+            return _apiClient.GetAsync<PagedResponse<PatientResponse>>(url, cancellationToken);
         }
 
-        return QueryHelpers.AddQueryString("api/patients", queryParams);
+        public Task<ApiResult<PatientResponse>> GetByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            return _apiClient.GetAsync<PatientResponse>($"api/patients/{id}", cancellationToken);
+        }
+
+        public Task<ApiResult<PatientResponse>> CreateAsync(PatientCreateViewModel model, CancellationToken cancellationToken)
+        {
+            return _apiClient.PostAsync<PatientCreateViewModel, PatientResponse>("api/patients", model, cancellationToken);
+        }
+
+        public Task<ApiResult<PatientResponse>> UpdateAsync(int id, PatientEditViewModel model, CancellationToken cancellationToken)
+        {
+            return _apiClient.PutAsync<PatientEditViewModel, PatientResponse>($"api/patients/{id}", model, cancellationToken);
+        }
+
+        public Task<ApiResult> DeleteAsync(int id, CancellationToken cancellationToken)
+        {
+            return _apiClient.DeleteAsync($"api/patients/{id}", cancellationToken);
+        }
+
+        private static string BuildQueryUrl(
+            string? search, string? sortBy, bool sortDescending, int pageNumber, int pageSize)
+        {
+            var queryParams = new Dictionary<string, string?>
+            {
+                ["pageNumber"] = pageNumber.ToString(),
+                ["pageSize"] = pageSize.ToString(),
+                ["sortDescending"] = sortDescending.ToString()
+            };
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                queryParams["search"] = search;
+            }
+
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                queryParams["sortBy"] = sortBy;
+            }
+
+            return QueryHelpers.AddQueryString("api/patients", queryParams);
+        }
     }
 }

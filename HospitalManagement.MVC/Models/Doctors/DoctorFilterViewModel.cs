@@ -1,10 +1,11 @@
-namespace HospitalManagement.MVC.Models.Doctors;
-
-public class DoctorFilterViewModel
+namespace HospitalManagement.MVC.Models.Doctors
 {
-    public string? Search { get; set; }
-    public string? SortBy { get; set; }
-    public bool SortDescending { get; set; }
-    public int PageNumber { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
+    public class DoctorFilterViewModel
+    {
+        public string? Search { get; set; }
+        public string? SortBy { get; set; }
+        public bool SortDescending { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+    }
 }

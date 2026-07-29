@@ -1,67 +1,68 @@
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.Net;
 
-namespace HospitalManagement.MVC.Middleware;
-
-public sealed class ExceptionHandlingMiddleware
+namespace HospitalManagement.MVC.Middleware
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
-
-    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+    public sealed class ExceptionHandlingMiddleware
     {
-        _next = next;
-        _logger = logger;
-    }
+        private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
-    public async Task InvokeAsync(HttpContext context)
-    {
-        try
+        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
-            await _next(context);
+            _next = next;
+            _logger = logger;
         }
-        catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+
+        public async Task InvokeAsync(HttpContext context)
         {
-            _logger.LogInformation(
-                "Request {Method} {Path} was cancelled by the client.",
-                context.Request.Method,
-                context.Request.Path);
-        }
-        catch (Exception exception)
-        {
-            if (context.Response.HasStarted)
+            try
             {
-                _logger.LogError(
-                    exception,
-                    "Unhandled exception occurred while processing {Method} {Path}",
+                await _next(context);
+            }
+            catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+            {
+                _logger.LogInformation(
+                    "Request {Method} {Path} was cancelled by the client.",
                     context.Request.Method,
                     context.Request.Path);
-
-                throw;
             }
+            catch (Exception exception)
+            {
+                if (context.Response.HasStarted)
+                {
+                    _logger.LogError(
+                        exception,
+                        "Unhandled exception occurred while processing {Method} {Path}",
+                        context.Request.Method,
+                        context.Request.Path);
 
-            HandleException(context, exception);
+                    throw;
+                }
+
+                HandleException(context, exception);
+            }
         }
-    }
 
-    private void HandleException(HttpContext context, Exception exception)
-    {
-        _logger.LogError(
-            exception,
-            "Unhandled exception occurred while processing {Method} {Path}",
-            context.Request.Method,
-            context.Request.Path);
+        private void HandleException(HttpContext context, Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "Unhandled exception occurred while processing {Method} {Path}",
+                context.Request.Method,
+                context.Request.Path);
 
-        context.Response.Clear();
+            context.Response.Clear();
 
-        var tempData = context.RequestServices
-            .GetRequiredService<ITempDataDictionaryFactory>()
-            .GetTempData(context);
+            var tempData = context.RequestServices
+                .GetRequiredService<ITempDataDictionaryFactory>()
+                .GetTempData(context);
 
-        tempData["ErrorStatusCode"] = (int)HttpStatusCode.InternalServerError;
-        tempData["ErrorMessage"] = "An unexpected error occurred.";
-        tempData.Save();
+            tempData["ErrorStatusCode"] = (int)HttpStatusCode.InternalServerError;
+            tempData["ErrorMessage"] = "An unexpected error occurred.";
+            tempData.Save();
 
-        context.Response.Redirect("/Home/Error");
+            context.Response.Redirect("/Home/Error");
+        }
     }
 }

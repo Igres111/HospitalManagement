@@ -4,53 +4,54 @@ using HospitalManagement.MVC.Models.Patients;
 using HospitalManagement.MVC.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace HospitalManagement.MVC.Services;
-
-public class AppointmentOptionsProvider : IAppointmentOptionsProvider
+namespace HospitalManagement.MVC.Services
 {
-    private readonly IDoctorService _doctorService;
-    private readonly IPatientService _patientService;
-
-    public AppointmentOptionsProvider(IDoctorService doctorService, IPatientService patientService)
+    public class AppointmentOptionsProvider : IAppointmentOptionsProvider
     {
-        _doctorService = doctorService;
-        _patientService = patientService;
-    }
+        private readonly IDoctorService _doctorService;
+        private readonly IPatientService _patientService;
 
-    public async Task<IEnumerable<SelectListItem>> GetDoctorOptionsAsync(CancellationToken cancellationToken)
-    {
-        var result = await _doctorService.GetAllAsync(
-            new DoctorFilterViewModel { PageSize = 50 },
-            cancellationToken);
-
-        if (result.IsError)
+        public AppointmentOptionsProvider(IDoctorService doctorService, IPatientService patientService)
         {
-            return Enumerable.Empty<SelectListItem>();
+            _doctorService = doctorService;
+            _patientService = patientService;
         }
 
-        return result.Value!.Items.Select(doctor => new SelectListItem(
-            $"{doctor.FirstName} {doctor.LastName}",
-            doctor.Id.ToString()));
-    }
-
-    public async Task<IEnumerable<SelectListItem>> GetPatientOptionsAsync(CancellationToken cancellationToken)
-    {
-        var result = await _patientService.GetAllAsync(
-            new PatientFilterViewModel { PageSize = 50 },
-            cancellationToken);
-
-        if (result.IsError)
+        public async Task<IEnumerable<SelectListItem>> GetDoctorOptionsAsync(CancellationToken cancellationToken)
         {
-            return Enumerable.Empty<SelectListItem>();
+            var result = await _doctorService.GetAllAsync(
+                new DoctorFilterViewModel { PageSize = 50 },
+                cancellationToken);
+
+            if (result.IsError)
+            {
+                return Enumerable.Empty<SelectListItem>();
+            }
+
+            return result.Value!.Items.Select(doctor => new SelectListItem(
+                $"{doctor.FirstName} {doctor.LastName}",
+                doctor.Id.ToString()));
         }
 
-        return result.Value!.Items.Select(patient => new SelectListItem(
-            $"{patient.FirstName} {patient.LastName}",
-            patient.Id.ToString()));
-    }
+        public async Task<IEnumerable<SelectListItem>> GetPatientOptionsAsync(CancellationToken cancellationToken)
+        {
+            var result = await _patientService.GetAllAsync(
+                new PatientFilterViewModel { PageSize = 50 },
+                cancellationToken);
 
-    public IEnumerable<SelectListItem> GetStatusOptions()
-    {
-        return Enum.GetValues<AppointmentStatus>().Select(status => new SelectListItem(status.ToString(), status.ToString()));
+            if (result.IsError)
+            {
+                return Enumerable.Empty<SelectListItem>();
+            }
+
+            return result.Value!.Items.Select(patient => new SelectListItem(
+                $"{patient.FirstName} {patient.LastName}",
+                patient.Id.ToString()));
+        }
+
+        public IEnumerable<SelectListItem> GetStatusOptions()
+        {
+            return Enum.GetValues<AppointmentStatus>().Select(status => new SelectListItem(status.ToString(), status.ToString()));
+        }
     }
 }

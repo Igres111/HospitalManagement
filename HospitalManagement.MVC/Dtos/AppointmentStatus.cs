@@ -1,8 +1,9 @@
-﻿namespace HospitalManagement.MVC.Dtos;
-
-public enum AppointmentStatus
+namespace HospitalManagement.MVC.Dtos
 {
-    Scheduled,
-    Completed,
-    Cancelled
+    public enum AppointmentStatus
+    {
+        Scheduled,
+        Completed,
+        Cancelled
+    }
 }

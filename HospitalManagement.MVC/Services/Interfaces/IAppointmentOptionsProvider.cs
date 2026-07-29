@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace HospitalManagement.MVC.Services.Interfaces;
-
-public interface IAppointmentOptionsProvider
+namespace HospitalManagement.MVC.Services.Interfaces
 {
-    Task<IEnumerable<SelectListItem>> GetDoctorOptionsAsync(CancellationToken cancellationToken);
-    Task<IEnumerable<SelectListItem>> GetPatientOptionsAsync(CancellationToken cancellationToken);
-    IEnumerable<SelectListItem> GetStatusOptions();
+    public interface IAppointmentOptionsProvider
+    {
+        Task<IEnumerable<SelectListItem>> GetDoctorOptionsAsync(CancellationToken cancellationToken);
+        Task<IEnumerable<SelectListItem>> GetPatientOptionsAsync(CancellationToken cancellationToken);
+        IEnumerable<SelectListItem> GetStatusOptions();
+    }
 }

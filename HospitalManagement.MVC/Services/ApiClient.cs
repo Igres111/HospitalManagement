@@ -67,7 +67,8 @@ namespace HospitalManagement.MVC.Services
         {
             if (!response.IsSuccessStatusCode)
             {
-                return await BuildFailureAsync<TResponse>(response, cancellationToken);
+                var failure = await BuildFailureAsync(response, cancellationToken);
+                return ApiResult<TResponse>.Failure(failure.StatusCode!.Value, failure.ErrorMessage!, failure.ErrorDetails);
             }
 
             var result = await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions, cancellationToken);
@@ -79,16 +80,6 @@ namespace HospitalManagement.MVC.Services
             }
 
             return ApiResult<TResponse>.Success(result);
-        }
-
-        private static async Task<ApiResult<TResponse>> BuildFailureAsync<TResponse>(HttpResponseMessage response, CancellationToken cancellationToken)
-        {
-            var error = await response.Content.ReadFromJsonAsync<ApiErrorResponse>(JsonOptions, cancellationToken);
-
-            return ApiResult<TResponse>.Failure(
-                (int)response.StatusCode,
-                error?.Message ?? "An unexpected error occurred while calling the API.",
-                error?.Details);
         }
 
         private static async Task<ApiResult> BuildFailureAsync(HttpResponseMessage response, CancellationToken cancellationToken)
